@@ -24,7 +24,7 @@ var (
 
 // Run provides a shell script interface for choosing between different through
 // options.
-func (o Options) Run() error {
+func (o *Options) Run() error {
 	if len(o.Options) == 0 {
 		input, _ := stdin.Read()
 		if input == "" {
@@ -145,12 +145,17 @@ func (o Options) Run() error {
 	}
 
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		fmt.Print(s.String())
+		o.doResult(s.String())
 	} else {
-		fmt.Print(ansi.Strip(s.String()))
+		o.doResult(ansi.Strip(s.String()))
 	}
 
 	return nil
+}
+
+func (o *Options) doResult(result string) {
+	o.SetResult(result)
+	fmt.Print(result)
 }
 
 // Check if an array contains a value.

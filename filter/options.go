@@ -3,6 +3,7 @@ package filter
 import (
 	"time"
 
+	"github.com/charmbracelet/gum/internal/utils"
 	"github.com/charmbracelet/gum/style"
 )
 
@@ -35,4 +36,6 @@ type Options struct {
 	Fuzzy                 bool          `help:"Enable fuzzy matching" default:"true" env:"GUM_FILTER_FUZZY" negatable:""`
 	Sort                  bool          `help:"Sort the results" default:"true" env:"GUM_FILTER_SORT" negatable:""`
 	Timeout               time.Duration `help:"Timeout until filter command aborts" default:"0" env:"GUM_FILTER_TIMEOUT"`
+
+	utils.Result
 }

@@ -83,7 +83,7 @@ type Gum struct {
 	//
 	// $ cat flavors.text | gum filter
 	//
-	Filter filter.Options `cmd:"" help:"Filter items from a list"`
+	Filter filter.Options `cmd:"" aliases:"s" help:"Filter items from a list"`
 
 	// Format allows you to render styled text from `markdown`, `code`,
 	// `template` strings, or embedded `emoji` strings.

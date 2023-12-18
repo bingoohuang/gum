@@ -3,6 +3,7 @@ package choose
 import (
 	"time"
 
+	"github.com/charmbracelet/gum/internal/utils"
 	"github.com/charmbracelet/gum/style"
 )
 
@@ -25,4 +26,6 @@ type Options struct {
 	ItemStyle         style.Styles  `embed:"" prefix:"item." hidden:"" envprefix:"GUM_CHOOSE_ITEM_"`
 	SelectedItemStyle style.Styles  `embed:"" prefix:"selected." set:"defaultForeground=212" envprefix:"GUM_CHOOSE_SELECTED_"`
 	Timeout           time.Duration `help:"Timeout until choose returns selected element" default:"0" env:"GUM_CCHOOSE_TIMEOUT"` // including timeout command options [Timeout,...]
+
+	utils.Result
 }
