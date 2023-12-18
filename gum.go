@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/alecthomas/kong"
+	"github.com/charmbracelet/gum/ps"
 
 	"github.com/charmbracelet/gum/choose"
 	"github.com/charmbracelet/gum/completion"
@@ -84,6 +85,7 @@ type Gum struct {
 	// $ cat flavors.text | gum filter
 	//
 	Filter filter.Options `cmd:"" aliases:"s" help:"Filter items from a list"`
+	Ps     ps.Options     `cmd:"" help:"Filter result of ps aux"`
 
 	// Format allows you to render styled text from `markdown`, `code`,
 	// `template` strings, or embedded `emoji` strings.
