@@ -1,6 +1,7 @@
 package ps
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -107,8 +108,18 @@ func (o *Options) Run() error {
 		o.doResult(m.textinput.Value())
 	}
 
-	return o.dealPsOutput()
+	if err := o.dealPsOutput(); err != nil {
+		if errors.Is(err, ErrIgnore) {
+			return nil
+		}
+		return err
+	}
+
+	o.Value = m.TextInputValue()
+	return o.Run()
 }
+
+var ErrIgnore = errors.New("ignored")
 
 func (o *Options) dealPsOutput() error {
 	chooseOptions := &choose.Options{Options: []string{
@@ -134,6 +145,8 @@ func (o *Options) dealPsOutput() error {
 		shell = "kill -9 " + pid
 	case strings.Contains(result, "kill"):
 		shell = "kill " + pid
+	case result == "ignore":
+		return ErrIgnore
 	}
 
 	if shell == "" {
@@ -142,13 +155,16 @@ func (o *Options) dealPsOutput() error {
 
 	fmt.Printf("shell: %q\n", shell)
 	stdOut, stdErr, err := utils.Shellout(shell)
+	if err != nil {
+		return err
+	}
 	if stdOut != "" {
 		fmt.Print(stdOut)
 	}
 	if stdErr != "" {
 		os.Stderr.WriteString(stdErr)
 	}
-	return err
+	return nil
 }
 
 func (o *Options) doResult(result string) {

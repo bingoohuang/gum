@@ -258,6 +258,10 @@ func If[T any](c bool, a, b T) T {
 	return b
 }
 
+func (m *model) TextInputValue() string {
+	return m.textinput.Value()
+}
+
 func (m *model) CursorUp() {
 	if m.reverse {
 		m.cursor = clamp(1, len(m.matches)-1, m.cursor+1)
