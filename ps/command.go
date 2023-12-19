@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -14,6 +15,7 @@ import (
 	"github.com/charmbracelet/gum/internal/exit"
 	"github.com/charmbracelet/gum/internal/utils"
 	"github.com/creasty/defaults"
+	"github.com/dustin/go-humanize"
 	"github.com/mattn/go-isatty"
 	"github.com/sahilm/fuzzy"
 )
@@ -34,6 +36,13 @@ func (o *Options) Run() error {
 		return err
 	}
 	o.Options = strings.Split(strings.TrimSuffix(input, "\n"), "\n")
+	for i := 1; i < len(o.Options); i++ {
+		fields := strings.Fields(o.Options[i])
+		vsz, rss := fields[4], fields[5]
+		vsz1, rss1 := humanizeBytes(vsz), humanizeBytes(rss)
+		o.Options[i] = strings.ReplaceAll(o.Options[i], vsz, vsz1)
+		o.Options[i] = strings.ReplaceAll(o.Options[i], rss, rss1)
+	}
 	options := []tea.ProgramOption{tea.WithOutput(os.Stderr)}
 	if o.Height == 0 {
 		options = append(options, tea.WithAltScreen())
@@ -117,6 +126,22 @@ func (o *Options) Run() error {
 
 	o.Value = m.TextInputValue()
 	return o.Run()
+}
+
+func humanizeBytes(sizeStr string) string {
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil {
+		return sizeStr
+	}
+
+	bytes := humanize.Bytes(uint64(size))
+	bytes = strings.ReplaceAll(bytes, " ", "")
+	diff := len(sizeStr) - len(bytes)
+	if diff < 0 {
+		return sizeStr
+	}
+
+	return strings.Repeat(" ", diff) + bytes
 }
 
 var ErrIgnore = errors.New("ignored")
