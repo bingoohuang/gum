@@ -54,7 +54,7 @@ func (o *Options) Run() error {
 	}
 	switch {
 	case o.Value != "":
-		matches = exactMatches(o.Value, o.Options)
+		matches = append([]fuzzy.Match{{Str: o.Options[0]}}, exactMatches(o.Value, o.Options[1:])...)
 	default:
 		matches = matchAll(o.Options)
 	}
@@ -150,6 +150,10 @@ func (o *Options) dealPsOutput() error {
 	chooseOptions := &choose.Options{Options: []string{
 		"kill",
 		"kill -9",
+		"kill -INT",
+		"kill -HUP",
+		"kill -USR1",
+		"kill -USR2",
 		"ignore",
 	}}
 
@@ -169,7 +173,7 @@ func (o *Options) dealPsOutput() error {
 	case strings.Contains(result, "kill -9"):
 		shell = "kill -9 " + pid
 	case strings.Contains(result, "kill"):
-		shell = "kill " + pid
+		shell = strings.TrimSpace(result) + " " + pid
 	case result == "ignore":
 		return ErrIgnore
 	}

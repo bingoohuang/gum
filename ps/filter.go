@@ -316,7 +316,7 @@ func exactMatches(search string, choices []string) []fuzzy.Match {
 
 		index := strings.Index(matchedString, search)
 		if index >= 0 {
-			matchedIndexes := []int{}
+			var matchedIndexes []int
 			for s := range search {
 				matchedIndexes = append(matchedIndexes, index+s)
 			}
