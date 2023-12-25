@@ -1,10 +1,10 @@
 package confirm
 
 import (
-	"github.com/bingoohuang/gum/internal/utils"
-	"github.com/creasty/defaults"
 	"time"
 
+	"github.com/alecthomas/kong"
+	"github.com/bingoohuang/gum/internal/utils"
 	"github.com/bingoohuang/gum/style"
 )
 
@@ -27,11 +27,26 @@ type Options struct {
 }
 
 // Confirm API方式确认
-func (o *Options) Confirm() (string, error) {
+func (o *Options) Confirm(prompt string) (string, error) {
+	kong.Parse(o, kong.Vars{
+		"defaultHeight":           "0",
+		"defaultWidth":            "0",
+		"defaultAlign":            "left",
+		"defaultBorder":           "none",
+		"defaultBorderForeground": "",
+		"defaultBorderBackground": "",
+		"defaultBackground":       "",
+		"defaultForeground":       "",
+		"defaultMargin":           "0 0",
+		"defaultPadding":          "0 0",
+		"defaultUnderline":        "false",
+		"defaultBold":             "false",
+		"defaultFaint":            "false",
+		"defaultItalic":           "false",
+		"defaultStrikethrough":    "false",
+	})
+	o.Prompt = prompt
 	o.AsAPI = true
-	if err := defaults.Set(o); err != nil {
-		return "", err
-	}
 
 	if err := o.Run(); err != nil {
 		return "", err
