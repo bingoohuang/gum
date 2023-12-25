@@ -14,7 +14,7 @@ type Options struct {
 	Indicator             string        `help:"Character for selection" default:"•" env:"GUM_FILTER_INDICATOR"`
 	IndicatorStyle        style.Styles  `embed:"" prefix:"indicator." set:"defaultForeground=212" envprefix:"GUM_FILTER_INDICATOR_"`
 	Limit                 int           `help:"Maximum number of options to pick" default:"1" group:"Selection"`
-	NoLimit               bool          `help:"Pick unlimited number of options (ignores limit)" group:"Selection"`
+	NoLimit               bool          `help:"Pick unlimited number of options (ignores limit)" default:"true" group:"Selection"`
 	Strict                bool          `help:"Only returns if anything matched. Otherwise return Filter" negatable:"true" default:"true" group:"Selection"`
 	SelectedPrefix        string        `help:"Character to indicate selected items (hidden if limit is 1)" default:" ◉ " env:"GUM_FILTER_SELECTED_PREFIX"`
 	SelectedPrefixStyle   style.Styles  `embed:"" prefix:"selected-indicator." set:"defaultForeground=212" envprefix:"GUM_FILTER_SELECTED_PREFIX_"`

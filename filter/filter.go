@@ -29,7 +29,6 @@ type model struct {
 	choices               []string
 	matches               []fuzzy.Match
 	cursor                int
-	minCursor             int
 	header                string
 	selected              map[string]struct{}
 	limit                 int
@@ -52,7 +51,6 @@ type model struct {
 	sort                  bool
 	timeout               time.Duration
 	hasTimeout            bool
-	psOutput              bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -222,31 +220,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				yOffsetFromBottom = max(0, len(m.matches)-m.viewport.YOffset)
 			}
 
-			choices := m.choices
-			var headMatches, matches []fuzzy.Match
-			if m.psOutput {
-				headMatches = matchAll(choices[:1])
-				choices = choices[1:]
-			}
 			// A character was entered, this likely means that the text input has
 			// changed. This suggests that the matches are outdated, so update them.
 			if m.fuzzy {
 				if m.sort {
-					matches = fuzzy.Find(m.textinput.Value(), choices)
+					m.matches = fuzzy.Find(m.textinput.Value(), m.choices)
 				} else {
-					matches = fuzzy.FindNoSort(m.textinput.Value(), choices)
+					m.matches = fuzzy.FindNoSort(m.textinput.Value(), m.choices)
 				}
 			} else {
-				matches = exactMatches(m.textinput.Value(), choices)
+				m.matches = exactMatches(m.textinput.Value(), m.choices)
 			}
 
 			// If the search field is empty, let's not display the matches
 			// (none), but rather display all possible choices.
 			if m.textinput.Value() == "" {
-				matches = matchAll(choices)
+				m.matches = matchAll(m.choices)
 			}
-
-			m.matches = append(headMatches, matches...)
 
 			// For reverse layout, we need to offset the viewport so that the
 			// it remains at a constant position relative to the cursor.
@@ -259,25 +249,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// It's possible that filtering items have caused fewer matches. So, ensure
 	// that the selected index is within the bounds of the number of matches.
-	m.cursor = clamp(m.minCursor, len(m.matches)-1, m.cursor)
+	m.cursor = clamp(0, len(m.matches)-1, m.cursor)
 	return m, cmd
-}
-
-func If[T any](c bool, a, b T) T {
-	if c {
-		return a
-	}
-	return b
 }
 
 func (m *model) CursorUp() {
 	if m.reverse {
-		m.cursor = clamp(m.minCursor, len(m.matches)-1, m.cursor+1)
+		m.cursor = clamp(0, len(m.matches)-1, m.cursor+1)
 		if len(m.matches)-m.cursor <= m.viewport.YOffset {
 			m.viewport.SetYOffset(len(m.matches) - m.cursor - 1)
 		}
 	} else {
-		m.cursor = clamp(m.minCursor, len(m.matches)-1, m.cursor-1)
+		m.cursor = clamp(0, len(m.matches)-1, m.cursor-1)
 		if m.cursor < m.viewport.YOffset {
 			m.viewport.SetYOffset(m.cursor)
 		}
@@ -286,12 +269,12 @@ func (m *model) CursorUp() {
 
 func (m *model) CursorDown() {
 	if m.reverse {
-		m.cursor = clamp(m.minCursor, len(m.matches)-1, m.cursor-1)
+		m.cursor = clamp(0, len(m.matches)-1, m.cursor-1)
 		if len(m.matches)-m.cursor > m.viewport.Height+m.viewport.YOffset {
 			m.viewport.LineDown(1)
 		}
 	} else {
-		m.cursor = clamp(m.minCursor, len(m.matches)-1, m.cursor+1)
+		m.cursor = clamp(0, len(m.matches)-1, m.cursor+1)
 		if m.cursor >= m.viewport.YOffset+m.viewport.Height {
 			m.viewport.LineDown(1)
 		}

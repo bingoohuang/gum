@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alecthomas/kong"
 	"github.com/bingoohuang/gum/ansi"
 	"github.com/bingoohuang/gum/choose"
 	"github.com/bingoohuang/gum/internal/exit"
@@ -14,7 +15,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/creasty/defaults"
 	"github.com/dustin/go-humanize"
 	"github.com/mattn/go-isatty"
 	"github.com/sahilm/fuzzy"
@@ -60,7 +60,7 @@ func (o *Options) Run() error {
 	}
 
 	if o.NoLimit {
-		o.Limit = len(o.Options)
+		o.Limit = len(o.Options) - 1
 	}
 
 	v := viewport.New(o.Width, o.Height)
@@ -147,7 +147,25 @@ func humanizeBytes(sizeStr string) string {
 var ErrIgnore = errors.New("ignored")
 
 func (o *Options) dealPsOutput() error {
-	chooseOptions := &choose.Options{Options: []string{
+	chooseOptions := &choose.Options{}
+	kong.Parse(chooseOptions, kong.Vars{
+		"defaultHeight":           "0",
+		"defaultWidth":            "0",
+		"defaultAlign":            "left",
+		"defaultBorder":           "none",
+		"defaultBorderForeground": "",
+		"defaultBorderBackground": "",
+		"defaultBackground":       "",
+		"defaultForeground":       "",
+		"defaultMargin":           "0 0",
+		"defaultPadding":          "0 0",
+		"defaultUnderline":        "false",
+		"defaultBold":             "false",
+		"defaultFaint":            "false",
+		"defaultItalic":           "false",
+		"defaultStrikethrough":    "false",
+	})
+	chooseOptions.Options = []string{
 		"kill",
 		"kill -9",
 		"kill -INT",
@@ -155,44 +173,45 @@ func (o *Options) dealPsOutput() error {
 		"kill -USR1",
 		"kill -USR2",
 		"ignore",
-	}}
-
-	if err := defaults.Set(chooseOptions); err != nil {
-		return err
 	}
+
 	if err := chooseOptions.Run(); err != nil {
 		return err
 	}
 
-	fields := strings.Fields(o.GetResult())
-	pid := fields[1]
-	shell := ""
+	result := chooseOptions.GetResult0()
 
-	result := chooseOptions.GetResult()
-	switch {
-	case strings.Contains(result, "kill -9"):
-		shell = "kill -9 " + pid
-	case strings.Contains(result, "kill"):
-		shell = strings.TrimSpace(result) + " " + pid
-	case result == "ignore":
-		return ErrIgnore
+	for _, psResult := range o.GetResult() {
+		fields := strings.Fields(psResult)
+		pid := fields[1]
+		shell := ""
+
+		switch {
+		case strings.Contains(result, "kill -9"):
+			shell = "kill -9 " + pid
+		case strings.Contains(result, "kill"):
+			shell = strings.TrimSpace(result) + " " + pid
+		case result == "ignore":
+			return ErrIgnore
+		}
+
+		if shell == "" {
+			return nil
+		}
+
+		fmt.Printf("shell: %q\n", shell)
+		stdOut, stdErr, err := utils.Shellout(shell)
+		if err != nil {
+			return err
+		}
+		if stdOut != "" {
+			fmt.Print(stdOut)
+		}
+		if stdErr != "" {
+			os.Stderr.WriteString(stdErr)
+		}
 	}
 
-	if shell == "" {
-		return nil
-	}
-
-	fmt.Printf("shell: %q\n", shell)
-	stdOut, stdErr, err := utils.Shellout(shell)
-	if err != nil {
-		return err
-	}
-	if stdOut != "" {
-		fmt.Print(stdOut)
-	}
-	if stdErr != "" {
-		os.Stderr.WriteString(stdErr)
-	}
 	return nil
 }
 
@@ -201,12 +220,16 @@ func (o *Options) doResult(result string) {
 	fmt.Println(result)
 }
 
-func (o Options) checkSelected(m model, isTTY bool) {
+func (o *Options) checkSelected(m model, isTTY bool) {
+	var result []string
 	for k := range m.selected {
+		result = append(result, k)
 		if isTTY {
 			fmt.Println(k)
 		} else {
 			fmt.Println(ansi.Strip(k))
 		}
 	}
+
+	o.SetResult(result...)
 }

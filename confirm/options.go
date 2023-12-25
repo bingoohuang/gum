@@ -52,5 +52,5 @@ func (o *Options) Confirm(prompt string) (string, error) {
 		return "", err
 	}
 
-	return o.GetResult(), nil
+	return o.GetResult0(), nil
 }

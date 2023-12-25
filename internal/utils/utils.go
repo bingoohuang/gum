@@ -17,11 +17,17 @@ func LipglossPadding(style lipgloss.Style) (int, int) {
 }
 
 type Result struct {
-	result string
+	result []string
 }
 
-func (o *Result) SetResult(result string) { o.result = result }
-func (o Result) GetResult() string        { return o.result }
+func (o *Result) SetResult(result ...string) { o.result = result }
+func (o Result) GetResult() []string         { return o.result }
+func (o Result) GetResult0() string {
+	if len(o.result) > 0 {
+		return o.result[0]
+	}
+	return ""
+}
 
 type GetResult interface {
 	GetResult() string
