@@ -15,9 +15,9 @@ package file
 import (
 	"time"
 
+	"github.com/bingoohuang/gum/timeout"
 	"github.com/charmbracelet/bubbles/filepicker"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/gum/timeout"
 )
 
 type model struct {

@@ -3,8 +3,8 @@ package choose
 import (
 	"time"
 
-	"github.com/charmbracelet/gum/internal/utils"
-	"github.com/charmbracelet/gum/style"
+	"github.com/bingoohuang/gum/internal/utils"
+	"github.com/bingoohuang/gum/style"
 )
 
 // Options is the customization options for the choose command.

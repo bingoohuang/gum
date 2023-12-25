@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/bingoohuang/gum/internal/utils"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/gum/internal/utils"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/reflow/truncate"
 )

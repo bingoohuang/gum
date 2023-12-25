@@ -13,7 +13,7 @@ package confirm
 import (
 	"time"
 
-	"github.com/charmbracelet/gum/timeout"
+	"github.com/bingoohuang/gum/timeout"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

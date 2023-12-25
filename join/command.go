@@ -20,7 +20,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/charmbracelet/gum/internal/decode"
+	"github.com/bingoohuang/gum/internal/decode"
 )
 
 // Run is the command-line interface for the joining strings through lipgloss.

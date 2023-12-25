@@ -3,7 +3,7 @@ package input
 import (
 	"time"
 
-	"github.com/charmbracelet/gum/style"
+	"github.com/bingoohuang/gum/style"
 )
 
 // Options are the customization options for the input.
