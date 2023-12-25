@@ -11,7 +11,7 @@ import (
 
 // Run provides a shell script interface for prompting a user to confirm an
 // action with an affirmative or negative answer.
-func (o Options) Run() error {
+func (o *Options) Run() error {
 	m, err := tea.NewProgram(model{
 		affirmative:      o.Affirmative,
 		negative:         o.Negative,
@@ -29,13 +29,26 @@ func (o Options) Run() error {
 		return fmt.Errorf("unable to run confirm: %w", err)
 	}
 
-	if m.(model).aborted {
-		os.Exit(exit.StatusAborted)
-	} else if m.(model).confirmation {
-		os.Exit(0)
+	md := m.(model)
+	if md.aborted {
+		o.SetResult("ABORTED")
+		if !o.AsAPI {
+			os.Exit(exit.StatusAborted)
+		}
+		return nil
 	}
 
-	os.Exit(1)
+	if md.confirmation {
+		o.SetResult("YES")
+		if !o.AsAPI {
+			os.Exit(0)
+		}
+		return nil
+	}
 
+	o.SetResult("NO")
+	if !o.AsAPI {
+		os.Exit(1)
+	}
 	return nil
 }

@@ -1,6 +1,8 @@
 package confirm
 
 import (
+	"github.com/charmbracelet/gum/internal/utils"
+	"github.com/creasty/defaults"
 	"time"
 
 	"github.com/charmbracelet/gum/style"
@@ -18,4 +20,22 @@ type Options struct {
 	//nolint:staticcheck
 	UnselectedStyle style.Styles  `embed:"" prefix:"unselected." help:"The style of the unselected action" set:"defaultBackground=235" set:"defaultForeground=254" set:"defaultPadding=0 3" set:"defaultMargin=1 1" envprefix:"GUM_CONFIRM_UNSELECTED_"`
 	Timeout         time.Duration `help:"Timeout until confirm returns selected value or default if provided" default:"0" env:"GUM_CONFIRM_TIMEOUT"`
+
+	utils.Result
+
+	AsAPI bool // 是否以 API 的方式调用，非(GUM 本身的方式），不会直接 print，或者 exit
+}
+
+// Confirm API方式确认
+func (o *Options) Confirm() (string, error) {
+	o.AsAPI = true
+	if err := defaults.Set(o); err != nil {
+		return "", err
+	}
+
+	if err := o.Run(); err != nil {
+		return "", err
+	}
+
+	return o.GetResult(), nil
 }
