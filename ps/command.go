@@ -35,37 +35,40 @@ func (o *Options) Run() error {
 	if err != nil {
 		return err
 	}
-	o.Options = strings.Split(strings.TrimSuffix(input, "\n"), "\n")
-	for i := 1; i < len(o.Options); i++ {
-		fields := strings.Fields(o.Options[i])
+	options := strings.Split(strings.TrimSuffix(input, "\n"), "\n")
+	for i := 1; i < len(options); i++ {
+		fields := strings.Fields(options[i])
 		vsz, rss := fields[4], fields[5]
 		vsz1, rss1 := humanizeBytes(vsz), humanizeBytes(rss)
-		o.Options[i] = strings.ReplaceAll(o.Options[i], vsz, vsz1)
-		o.Options[i] = strings.ReplaceAll(o.Options[i], rss, rss1)
+		options[i] = strings.ReplaceAll(options[i], vsz, vsz1)
+		options[i] = strings.ReplaceAll(options[i], rss, rss1)
 	}
-	options := []tea.ProgramOption{tea.WithOutput(os.Stderr)}
+	teaOptions := []tea.ProgramOption{tea.WithOutput(os.Stderr)}
 	if o.Height == 0 {
-		options = append(options, tea.WithAltScreen())
+		teaOptions = append(teaOptions, tea.WithAltScreen())
 	}
 
 	var matches []fuzzy.Match
+	if o.Value == "" && len(o.Options) > 0 {
+		o.Value = o.Options[0]
+	}
 	if o.Value != "" {
 		i.SetValue(o.Value)
 	}
 	switch {
 	case o.Value != "":
-		matches = append([]fuzzy.Match{{Str: o.Options[0]}}, exactMatches(o.Value, o.Options[1:])...)
+		matches = append([]fuzzy.Match{{Str: options[0]}}, exactMatches(o.Value, options[1:])...)
 	default:
-		matches = matchAll(o.Options)
+		matches = matchAll(options)
 	}
 
 	if o.NoLimit {
-		o.Limit = len(o.Options) - 1
+		o.Limit = len(options) - 1
 	}
 
 	v := viewport.New(o.Width, o.Height)
 	p := tea.NewProgram(model{
-		choices:               o.Options,
+		choices:               options,
 		indicator:             o.Indicator,
 		matches:               matches,
 		header:                o.Header,
@@ -87,7 +90,7 @@ func (o *Options) Run() error {
 		timeout:               o.Timeout,
 		hasTimeout:            o.Timeout > 0,
 		sort:                  o.Sort,
-	}, options...)
+	}, teaOptions...)
 
 	tm, err := p.Run()
 	if err != nil {
