@@ -20,6 +20,8 @@ import (
 	"github.com/sahilm/fuzzy"
 )
 
+var currentPid = strconv.Itoa(os.Getpid())
+
 // Run provides a shell script interface for filtering through options, powered
 // by the textinput bubble.
 func (o *Options) Run() error {
@@ -36,13 +38,23 @@ func (o *Options) Run() error {
 		return err
 	}
 	options := strings.Split(strings.TrimSuffix(input, "\n"), "\n")
+	selfIndex := 0
 	for i := 1; i < len(options); i++ {
 		fields := strings.Fields(options[i])
-		vsz, rss := fields[4], fields[5]
+		pid, vsz, rss := fields[1], fields[4], fields[5]
+		if pid == currentPid {
+			selfIndex = i
+			continue
+		}
+
 		vsz1, rss1 := humanizeBytes(vsz), humanizeBytes(rss)
 		options[i] = strings.ReplaceAll(options[i], vsz, vsz1)
 		options[i] = strings.ReplaceAll(options[i], rss, rss1)
 	}
+	if selfIndex > 0 {
+		copy(options[selfIndex:], options[selfIndex+1:])
+	}
+
 	teaOptions := []tea.ProgramOption{tea.WithOutput(os.Stderr)}
 	if o.Height == 0 {
 		teaOptions = append(teaOptions, tea.WithAltScreen())
