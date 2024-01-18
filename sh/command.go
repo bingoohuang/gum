@@ -18,7 +18,7 @@ import (
 
 // Run provides a shell script interface for the text input bubble.
 // https://github.com/charmbracelet/bubbles/textinput
-func (o Options) Run() error {
+func (o *Options) Run() error {
 	for {
 		if err := o.run(); err != nil {
 			if errors.Is(err, exit.ErrAborted) {
@@ -29,7 +29,7 @@ func (o Options) Run() error {
 		}
 	}
 }
-func (o Options) run() error {
+func (o *Options) run() error {
 	i := textinput.New()
 	if o.Value != "" {
 		i.SetValue(o.Value)
@@ -85,18 +85,20 @@ func (o Options) run() error {
 	cmd := words[0]
 
 	switch cmd {
+	case "file":
+		return o.setFile(words[1:])
 	case "write":
-		return writeFile(words[1:])
+		return o.writeFile(words[1:])
 	case "read":
-		return readFile(words[1:])
+		return o.readFile(words[1:])
 	case "append":
-		return appendFile(words[1:])
+		return o.appendFile(words[1:])
 	}
 
 	return fmt.Errorf("unknown command %s", cmd)
 }
 
-func readFile(args []string) error {
+func (o *Options) readFile(args []string) error {
 	var fileName string
 	f := flag.NewFlagSet("flag", flag.ExitOnError)
 	f.StringVar(&fileName, "f", "", "file name")
@@ -104,10 +106,11 @@ func readFile(args []string) error {
 		return err
 	}
 
-	if fileName == "" && len(f.Args()) > 0 {
-		fileName = f.Args()[0]
+	var err error
+	fileName, err = o.getFileName(fileName, f)
+	if err != nil {
+		return err
 	}
-	fileName, _ = homedir.Expand(fileName)
 
 	data, err := os.ReadFile(fileName)
 	if err != nil {
@@ -118,7 +121,7 @@ func readFile(args []string) error {
 	return nil
 }
 
-func appendFile(args []string) error {
+func (o *Options) appendFile(args []string) error {
 	var fileName string
 	var text string
 	f := flag.NewFlagSet("flag", flag.ExitOnError)
@@ -128,10 +131,11 @@ func appendFile(args []string) error {
 		return err
 	}
 
-	if fileName == "" && len(f.Args()) > 0 {
-		fileName = f.Args()[0]
+	var err error
+	fileName, err = o.getFileName(fileName, f)
+	if err != nil {
+		return err
 	}
-	fileName, _ = homedir.Expand(fileName)
 
 	fi, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -145,16 +149,37 @@ func appendFile(args []string) error {
 	} else if text, err = gofakeit.Template(text, nil); err != nil {
 		return err
 	}
-	if _, err := fi.WriteString(text); err != nil {
+	if _, err := fi.WriteString(text + "\n"); err != nil {
 		return err
 	}
 
-	fmt.Printf("append %d bytes to %s successfully\n", len(text), fileName)
+	fmt.Printf("append %d bytes to %s successfully\n", len(text)+1, fileName)
 
 	return nil
 }
 
-func writeFile(args []string) error {
+func (o *Options) setFile(args []string) error {
+	var fileName string
+	f := flag.NewFlagSet("flag", flag.ExitOnError)
+	f.StringVar(&fileName, "f", "", "file name")
+	if err := f.Parse(args); err != nil {
+		return err
+	}
+
+	if fileName == "" && len(f.Args()) > 0 {
+		fileName = f.Args()[0]
+	}
+
+	var err error
+	fileName, err = homedir.Expand(fileName)
+	if err != nil {
+		return err
+	}
+
+	o.fileName = fileName
+	return nil
+}
+func (o *Options) writeFile(args []string) error {
 	var fileName string
 	var text string
 	var err error
@@ -166,11 +191,10 @@ func writeFile(args []string) error {
 		return err
 	}
 
-	if fileName == "" && len(f.Args()) > 0 {
-		fileName = f.Args()[0]
+	fileName, err = o.getFileName(fileName, f)
+	if err != nil {
+		return err
 	}
-
-	fileName, _ = homedir.Expand(fileName)
 
 	if text == "" {
 		text = gofakeit.MovieName()
@@ -178,10 +202,28 @@ func writeFile(args []string) error {
 		return err
 	}
 
-	if err := os.WriteFile(fileName, []byte(text), 0644); err != nil {
+	if err := os.WriteFile(fileName, []byte(text+"\n"), 0644); err != nil {
 		return err
 	}
 
 	fmt.Printf("wrote %d bytes to %s successfully\n", len(text), fileName)
 	return nil
+}
+
+func (o *Options) getFileName(fileName string, f *flag.FlagSet) (string, error) {
+	if fileName == "" && len(f.Args()) > 0 {
+		fileName = f.Args()[0]
+	}
+
+	var err error
+	if fileName == "" {
+		fileName = o.fileName
+	} else {
+		fileName, err = homedir.Expand(fileName)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return fileName, nil
 }
