@@ -7,6 +7,7 @@ toolchain go1.21.5
 require (
 	github.com/alecthomas/kong v0.8.1
 	github.com/alecthomas/mango-kong v0.1.0
+	github.com/brianvoe/gofakeit/v6 v6.27.0
 	github.com/charmbracelet/bubbles v0.17.1
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/glamour v0.6.1-0.20230531150759-6d5b52861a9d
@@ -14,6 +15,8 @@ require (
 	github.com/charmbracelet/log v0.3.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/mattn/go-isatty v0.0.20
+	github.com/mattn/go-shellwords v1.0.12
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/reflow v0.3.0
 	github.com/muesli/roff v0.1.0
 	github.com/muesli/termenv v0.15.2

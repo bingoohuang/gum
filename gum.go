@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/alecthomas/kong"
-	"github.com/bingoohuang/gum/ps"
-
 	"github.com/bingoohuang/gum/choose"
 	"github.com/bingoohuang/gum/completion"
 	"github.com/bingoohuang/gum/confirm"
@@ -15,6 +13,8 @@ import (
 	"github.com/bingoohuang/gum/log"
 	"github.com/bingoohuang/gum/man"
 	"github.com/bingoohuang/gum/pager"
+	"github.com/bingoohuang/gum/ps"
+	"github.com/bingoohuang/gum/sh"
 	"github.com/bingoohuang/gum/spin"
 	"github.com/bingoohuang/gum/style"
 	"github.com/bingoohuang/gum/table"
@@ -101,6 +101,9 @@ type Gum struct {
 	// $ gum input --placeholder "What's your favorite gum?" > answer.text
 	//
 	Input input.Options `cmd:"" help:"Prompt for some input"`
+
+	// Sh 输入命令执行
+	Sh sh.Options `cmd:"" help:"Shell"`
 
 	// Join provides a shell script interface for the lipgloss JoinHorizontal
 	// and JoinVertical commands. It allows you to join multi-line text to
