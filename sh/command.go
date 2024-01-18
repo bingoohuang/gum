@@ -87,6 +87,8 @@ func (o *Options) run() error {
 	switch cmd {
 	case "file":
 		return o.setFile(words[1:])
+	case "rm":
+		return o.rmFile(words[1:])
 	case "write":
 		return o.writeFile(words[1:])
 	case "read":
@@ -179,6 +181,24 @@ func (o *Options) setFile(args []string) error {
 	o.fileName = fileName
 	return nil
 }
+func (o *Options) rmFile(args []string) error {
+	var fileName string
+	var err error
+
+	f := flag.NewFlagSet("flag", flag.ExitOnError)
+	f.StringVar(&fileName, "f", "", "file name")
+	if err := f.Parse(args); err != nil {
+		return err
+	}
+
+	fileName, err = o.getFileName(fileName, f)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(fileName)
+}
+
 func (o *Options) writeFile(args []string) error {
 	var fileName string
 	var text string
