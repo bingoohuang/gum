@@ -4,7 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"time"
 
 	"github.com/bingoohuang/gum/cursor"
 	"github.com/bingoohuang/gum/internal/exit"
@@ -95,11 +97,43 @@ func (o *Options) run() error {
 		return o.readFile(words[1:])
 	case "append":
 		return o.appendFile(words[1:])
+	case "stat":
+		return o.statFile(words[1:])
 	}
 
 	return fmt.Errorf("unknown command %s", cmd)
 }
 
+func (o *Options) statFile(args []string) error {
+	var fileName string
+	f := flag.NewFlagSet("flag", flag.ExitOnError)
+	f.StringVar(&fileName, "f", "", "file name")
+	if err := f.Parse(args); err != nil {
+		return err
+	}
+
+	var err error
+	fileName, err = o.getFileName(fileName, f)
+	if err != nil {
+		return err
+	}
+
+	stat, err := os.Stat(fileName)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("file %s not exists", fileName)
+		}
+		return err
+	}
+
+	log.Printf("Name: %s", stat.Name())
+	log.Printf("Size: %s", stat.Size())
+	log.Printf("IsDir: %t", stat.IsDir())
+	log.Printf("Mode: %s", stat.Mode())
+	log.Printf("ModTime: %s", stat.ModTime().Format(time.RFC3339Nano))
+
+	return nil
+}
 func (o *Options) readFile(args []string) error {
 	var fileName string
 	f := flag.NewFlagSet("flag", flag.ExitOnError)
