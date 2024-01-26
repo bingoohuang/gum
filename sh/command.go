@@ -99,9 +99,16 @@ func (o *Options) run() error {
 		return o.appendFile(words[1:])
 	case "stat":
 		return o.statFile(words[1:])
+	default:
+		fmt.Printf("unknown command: %s", cmd)
+		fmt.Printf("available commands:")
+		fmt.Printf("write {file}")
+		fmt.Printf("read {file}")
+		fmt.Printf("append {file}")
+		fmt.Printf("stat {file}")
 	}
 
-	return fmt.Errorf("unknown command %s", cmd)
+	return nil
 }
 
 func (o *Options) statFile(args []string) error {
