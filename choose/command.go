@@ -13,13 +13,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/gum/internal/stdin"
 	"github.com/charmbracelet/gum/internal/timeout"
-	"github.com/charmbracelet/gum/internal/tty"
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Run provides a shell script interface for choosing between different through
-// options.
-func (o Options) Run() error {
+func (o Options) RunBingoo() ([]int, []string, error) {
 	var (
 		subduedStyle     = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#847A85", Dark: "#979797"})
 		verySubduedStyle = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#DDDADA", Dark: "#3C3C3C"})
@@ -30,7 +27,7 @@ func (o Options) Run() error {
 		o.Selected = strings.Split(input, o.InputDelimiter)
 	} else if len(o.Options) == 0 {
 		if input == "" {
-			return errors.New("no options provided, see `gum choose --help`")
+			return nil, nil, errors.New("no options provided, see `gum choose --help`")
 		}
 		o.Options = strings.Split(input, o.InputDelimiter)
 	}
@@ -46,7 +43,7 @@ func (o Options) Run() error {
 		}
 		label, value, ok := strings.Cut(opt, o.LabelDelimiter)
 		if !ok {
-			return fmt.Errorf("invalid option format: %q", opt)
+			return nil, nil, fmt.Errorf("invalid option format: %q", opt)
 		}
 		labels = append(labels, label)
 		options[label] = value
@@ -56,8 +53,7 @@ func (o Options) Run() error {
 	}
 
 	if o.SelectIfOne && len(o.Options) == 1 {
-		fmt.Println(options[o.Options[0]])
-		return nil
+		return []int{0}, []string{options[o.Options[0]]}, nil
 	}
 
 	// We don't need to display prefixes if we are only picking one option.
@@ -156,11 +152,11 @@ func (o Options) Run() error {
 		tea.WithContext(ctx),
 	).Run()
 	if err != nil {
-		return fmt.Errorf("unable to pick selection: %w", err)
+		return nil, nil, fmt.Errorf("unable to pick selection: %w", err)
 	}
 	m = tm.(model)
 	if !m.submitted {
-		return errors.New("nothing selected")
+		return nil, nil, errors.New("nothing selected")
 	}
 	if o.Ordered && o.Limit > 1 {
 		sort.Slice(m.items, func(i, j int) bool {
@@ -168,12 +164,13 @@ func (o Options) Run() error {
 		})
 	}
 
+	var selected []int
 	var out []string
-	for _, item := range m.items {
+	for i, item := range m.items {
 		if item.selected {
+			selected = append(selected, i)
 			out = append(out, options[item.text])
 		}
 	}
-	tty.Println(strings.Join(out, o.OutputDelimiter))
-	return nil
+	return selected, out, nil
 }

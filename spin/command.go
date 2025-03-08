@@ -13,7 +13,7 @@ import (
 
 // Run provides a shell script interface for the spinner bubble.
 // https://github.com/charmbracelet/bubbles/spinner
-func (o Options) Run() error {
+func (o Options) RunBingoo() error {
 	isOutTTY := term.IsTerminal(os.Stdout.Fd())
 	isErrTTY := term.IsTerminal(os.Stderr.Fd())
 
@@ -23,23 +23,28 @@ func (o Options) Run() error {
 	m := model{
 		spinner:    s,
 		title:      o.TitleStyle.ToLipgloss().Render(o.Title),
+		titleFn:    o.TitleFn,
+		anyKey:     o.AnyKey,
 		command:    o.Command,
 		align:      o.Align,
 		showStdout: (o.ShowOutput || o.ShowStdout) && isOutTTY,
 		showStderr: (o.ShowOutput || o.ShowStderr) && isErrTTY,
 		showError:  o.ShowError,
 		isTTY:      isErrTTY,
+		clearView:  o.ClearView,
 	}
 
 	ctx, cancel := timeout.Context(o.Timeout)
 	defer cancel()
 
-	tm, err := tea.NewProgram(
-		m,
+	opts := []tea.ProgramOption{
 		tea.WithOutput(os.Stderr),
 		tea.WithContext(ctx),
-		tea.WithInput(nil),
-	).Run()
+	}
+	if len(o.Command) > 0 {
+		opts = append(opts, tea.WithInput(nil))
+	}
+	tm, err := tea.NewProgram(m, opts...).Run()
 	if err != nil {
 		return fmt.Errorf("unable to run action: %w", err)
 	}
@@ -75,5 +80,9 @@ func (o Options) Run() error {
 		}
 	}
 
-	return exit.ErrExit(m.status)
+	if len(o.Command) > 0 {
+		return exit.ErrExit(m.status)
+	}
+
+	return nil
 }

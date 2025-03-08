@@ -32,9 +32,12 @@ import (
 type model struct {
 	spinner    spinner.Model
 	title      string
+	titleFn    func() string
+	anyKey     bool
 	align      string
 	command    []string
 	quitting   bool
+	clearView  bool
 	isTTY      bool
 	status     int
 	stdout     string
@@ -44,6 +47,13 @@ type model struct {
 	showStderr bool
 	showError  bool
 	err        error
+}
+
+func (m model) getTitle() string {
+	if m.titleFn != nil {
+		return m.titleFn()
+	}
+	return m.title
 }
 
 var (
@@ -138,14 +148,16 @@ func commandAbort() tea.Msg {
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(
-		m.spinner.Tick,
-		commandStart(m.command),
-	)
+	cmds := []tea.Cmd{m.spinner.Tick}
+	if len(m.command) > 0 {
+		cmds = append(cmds, commandStart(m.command))
+	}
+
+	return tea.Batch(cmds...)
 }
 
 func (m model) View() string {
-	if m.quitting {
+	if m.quitting && m.clearView {
 		return ""
 	}
 
@@ -158,14 +170,14 @@ func (m model) View() string {
 	}
 
 	if !m.isTTY {
-		return m.title
+		return m.getTitle()
 	}
 
 	var header string
 	if m.align == "left" {
-		header = m.spinner.View() + " " + m.title
+		header = m.spinner.View() + " " + m.getTitle()
 	} else {
-		header = m.title + " " + m.spinner.View()
+		header = m.getTitle() + " " + m.spinner.View()
 	}
 	return header + "\n" + out
 }
@@ -183,6 +195,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, commandAbort
+		}
+		if m.anyKey {
+			m.quitting = true
+			return m, tea.Quit
 		}
 	case errorMsg:
 		m.err = msg

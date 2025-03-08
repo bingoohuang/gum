@@ -13,6 +13,9 @@ type Options struct {
 	Affirmative string `help:"The title of the affirmative action" default:"Yes"`
 	Negative    string `help:"The title of the negative action" default:"No"`
 	Prompt      string `arg:"" help:"Prompt to display." default:"Are you sure?"`
+
+	PromptFn func() string `kong:"-"`
+
 	//nolint:staticcheck
 	PromptStyle style.Styles `embed:"" prefix:"prompt." help:"The style of the prompt" set:"defaultMargin=0 0 0 1" set:"defaultForeground=#7571F9" set:"defaultBold=true" envprefix:"GUM_CONFIRM_PROMPT_"`
 	//nolint:staticcheck

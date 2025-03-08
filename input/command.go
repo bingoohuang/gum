@@ -13,9 +13,9 @@ import (
 	"github.com/charmbracelet/gum/internal/timeout"
 )
 
-// Run provides a shell script interface for the text input bubble.
+// RunBingoo provides a shell script interface for the text input bubble.
 // https://github.com/charmbracelet/bubbles/textinput
-func (o Options) Run() error {
+func (o Options) RunBingoo() (string, error) {
 	if o.Value == "" {
 		if in, _ := stdin.Read(stdin.StripANSI(o.StripANSI)); in != "" {
 			o.Value = in
@@ -64,13 +64,12 @@ func (o Options) Run() error {
 	)
 	tm, err := p.Run()
 	if err != nil {
-		return fmt.Errorf("failed to run input: %w", err)
+		return "", fmt.Errorf("failed to run input: %w", err)
 	}
 
 	m = tm.(model)
 	if !m.submitted {
-		return errors.New("not submitted")
+		return "", errors.New("not submitted")
 	}
-	fmt.Println(m.textinput.Value())
-	return nil
+	return m.textinput.Value(), nil
 }

@@ -75,6 +75,7 @@ func (k keymap) ShortHelp() []key.Binding {
 
 type model struct {
 	prompt      string
+	promptFn    func() string
 	affirmative string
 	negative    string
 	quitting    bool
@@ -91,6 +92,13 @@ type model struct {
 	promptStyle     lipgloss.Style
 	selectedStyle   lipgloss.Style
 	unselectedStyle lipgloss.Style
+}
+
+func (m model) getPrompt() string {
+	if m.promptFn != nil {
+		return m.promptFn()
+	}
+	return m.prompt
 }
 
 func (m model) Init() tea.Cmd { return nil }
@@ -152,7 +160,7 @@ func (m model) View() string {
 	if m.showHelp {
 		return lipgloss.JoinVertical(
 			lipgloss.Left,
-			m.promptStyle.Render(m.prompt)+"\n",
+			m.promptStyle.Render(m.getPrompt())+"\n",
 			lipgloss.JoinHorizontal(lipgloss.Left, aff, neg),
 			"\n"+m.help.View(m.keys),
 		)
@@ -160,7 +168,7 @@ func (m model) View() string {
 
 	return lipgloss.JoinVertical(
 		lipgloss.Left,
-		m.promptStyle.Render(m.prompt)+"\n",
+		m.promptStyle.Render(m.getPrompt())+"\n",
 		lipgloss.JoinHorizontal(lipgloss.Left, aff, neg),
 	)
 }
