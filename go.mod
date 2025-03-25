@@ -4,13 +4,13 @@ go 1.23.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.3.1
-	github.com/alecthomas/kong v1.8.1
+	github.com/alecthomas/kong v1.9.0
 	github.com/alecthomas/mango-kong v0.1.0
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.3.4
-	github.com/charmbracelet/glamour v0.8.0
-	github.com/charmbracelet/lipgloss v1.0.1-0.20250110214317-ecc1bd014d51
-	github.com/charmbracelet/log v0.4.0
+	github.com/charmbracelet/glamour v0.9.1
+	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/charmbracelet/log v0.4.1
 	github.com/charmbracelet/x/ansi v0.8.0
 	github.com/charmbracelet/x/editor v0.1.0
 	github.com/charmbracelet/x/term v0.2.1
@@ -27,8 +27,10 @@ require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
+	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/conpty v0.1.0 // indirect
-	github.com/charmbracelet/x/errors v0.0.0-20250303111204-ce812b082f54 // indirect
+	github.com/charmbracelet/x/errors v0.0.0-20250324105510-c72bdbf70572 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
@@ -45,6 +47,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/mango v0.2.0 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	github.com/yuin/goldmark-emoji v1.0.5 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
