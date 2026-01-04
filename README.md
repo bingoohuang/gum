@@ -264,7 +264,7 @@ gum confirm && rm file.txt || echo "File not removed"
 Prompt the user to select a file from the file tree.
 
 ```bash
-EDITOR $(gum file $HOME)
+$EDITOR $(gum file $HOME)
 ```
 
 <img src="https://vhs.charm.sh/vhs-2RMRqmnOPneneIgVJJ3mI1.gif" width="600" alt="Shell running gum file" />
@@ -456,6 +456,12 @@ gum filter < $HISTFILE --height 20
 ```bash
 alias please="gum input --password | sudo -nS"
 ```
+
+## Contributing
+
+See [contributing][contribute].
+
+[contribute]: https://github.com/charmbracelet/gum/contribute
 
 ## Feedback
 

@@ -13,6 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/gum/internal/stdin"
 	"github.com/charmbracelet/gum/internal/timeout"
+	"github.com/charmbracelet/gum/style"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -35,7 +36,7 @@ func (o Options) RunBingoo() ([]int, []string, error) {
 	// normalize options into a map
 	options := map[string]string{}
 	// keep the labels in the user-provided order
-	var labels []string
+	var labels []string //nolint:prealloc
 	for _, opt := range o.Options {
 		if o.LabelDelimiter == "" {
 			options[opt] = opt
@@ -103,6 +104,7 @@ func (o Options) RunBingoo() ([]int, []string, error) {
 
 	// Use the pagination model to display the current and total number of
 	// pages.
+	top, right, bottom, left := style.ParsePadding(o.Padding)
 	pager := paginator.New()
 	pager.SetTotalPages((len(items) + o.Height - 1) / o.Height)
 	pager.PerPage = o.Height
@@ -124,6 +126,7 @@ func (o Options) RunBingoo() ([]int, []string, error) {
 		index:             startingIndex,
 		currentOrder:      currentOrder,
 		height:            o.Height,
+		padding:           []int{top, right, bottom, left},
 		cursor:            o.Cursor,
 		header:            o.Header,
 		selectedPrefix:    o.SelectedPrefix,
